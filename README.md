@@ -1,38 +1,44 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# **Meeting Transcription and Summary Demo App**
 
-## Getting Started
+This is a demo app that uses OpenAI Whisper and ChatGPT, Daily's video APIs, and Node mailer to automatically transcribe a meeting and generate a meeting summary.
 
-First, run the development server:
+## **Installation**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+To get started, clone this repository and set the following environment variables:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **`DAILY_API_KEY`**: Your Daily.co API key
+- **`EMAIL_SUMMARY`**: The email address where the meeting summary will be sent
+- **`NEXT_PUBLIC_ROOM_URL`**: The URL of the Daily.co room where the meeting will be held
+- **`ROOM_NAME`**: The name of the Daily.co room where the meeting will be held
+- **`OPENAI_API_KEY`**: Your OpenAI API key
+- **`SERVER_URL`**: The URL of your server where the app will be hosted
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## **Usage**
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+1.Install dependencies with **`yarn`**.
+2. Start the app by running **`yarn dev`**.
+3. Join the Daily.co room using the **`NEXT_PUBLIC_ROOM_URL`** environment variable.
+4. The app will automatically transcribe the meeting using OpenAI Whisper and ChatGPT.
+5. After the meeting, the app will generate a meeting summary and log the preview email to the console for to the email address specified in the **`EMAIL_SUMMARY`** environment variable.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## **Obtaining Daily API Credentials**
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+To obtain your Daily API credentials, follow these steps:
 
-## Learn More
+1. Go to **[https://dashboard.daily.co/developers](https://dashboard.daily.co/developers)**.
+2. Sign up for a Daily.co account if you haven't already.
+3. Create a new API key.
+4. Copy the API key and use it as the **`DAILY_API_KEY`** environment variable.
 
-To learn more about Next.js, take a look at the following resources:
+## **Obtaining OpenAI API Credentials**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To obtain your OpenAI API credentials, follow these steps:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Go to **[https://beta.openai.com/signup/](https://beta.openai.com/signup/)**.
+2. Sign up for an OpenAI account if you haven't already.
+3. Create a new API key.
+4. Copy the API key and use it as the **`OPENAI_API_KEY`** environment variable.
 
-## Deploy on Vercel
+## **License**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This app is licensed under the MIT license. See the **`LICENSE`** file for more details
