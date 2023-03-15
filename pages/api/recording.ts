@@ -26,7 +26,7 @@ export default async function handler(
     if (!recordings || recordings.length === 0) {
       return res.status(500).send('Could not fetch access link');
     }
-    const firstRecording = recordings[0].id;
+    const firstRecording = recordings[0];
     const recordingId = firstRecording.id;
 
     // Get the Daily recording access link
@@ -57,7 +57,9 @@ export default async function handler(
 }
 
 function getRoomName(roomURL?: string): string {
-  if (!roomURL) return '';
+  if (!roomURL) {
+    throw new Error("roomURL is undefined");
+  }
   const parts = roomURL.split('/');
   return parts[parts.length - 1];
 }
