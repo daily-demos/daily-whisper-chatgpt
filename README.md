@@ -44,6 +44,16 @@ To obtain your OpenAI API credentials, follow these steps:
 3. [Create a new API key](https://platform.openai.com/account/api-keys).
 4. Copy the API key and use it as the **`OPENAI_API_KEY`** environment variable.
 
+## **Obtaining SMTP Credentials from Sendinblue**
+
+To obtain SMTP credentials from Sendinblue, follow the below steps. Note that you can use any SMTP service you desire, but Sendinblue has a generous free plan that works well for demoing the repo.
+
+1. Go to [Sendinblue](https://www.sendinblue.com/) and create an account or Log in.
+2. In the dashboard, click on the "SMTP & API" tab in the left sidebar.
+3. Click on the [SMTP & API](https://app.sendinblue.com/settings/keys/smtp) and then click on the "Create a new SMTP key" button.
+4. Enter a name for your SMTP key and click on the "Create" button.
+5. Once your SMTP key is created, you can view the SMTP server, SMTP port, SMTP login, and SMTP password by clicking on the "View" button next to your key name.
+
 ## **License**
 
 This app is licensed under the MIT license. See the **`LICENSE`** file for more details

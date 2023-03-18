@@ -14,6 +14,13 @@ export default async function handler(
     const smtpPort = process.env.SMTP_PORT;
     const smtpServer = process.env.SMTP_SERVER;
 
+    // check if any of the variables are undefined
+    if (!email || !smtpLogin || !smtpPassword || !smtpPort || !smtpServer) {
+      throw new Error(
+        'One or more of the SMTP or email environment variables are not defined'
+      );
+    }
+
     // create reusable transporter object using the default SMTP transport
     const transporter = nodemailer.createTransport({
       host: smtpServer,
@@ -24,11 +31,6 @@ export default async function handler(
         pass: smtpPassword,
       },
     } as nodemailer.TransportOptions);
-
-    // check if Email_Summary is defined
-    if (!process.env.EMAIL_SUMMARY) {
-      throw new Error('EMAIL_SUMMARY environment variable is not defined');
-    }
 
     // send mail with defined transport object
     const info = await transporter.sendMail({

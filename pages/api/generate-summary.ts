@@ -11,12 +11,8 @@ export default async function handler(
     // Call the recording API
     const recordingResponse = await axios.post(`${serverUrl}/api/recording`);
     const recordingLink = recordingResponse.data.data[0].download_link;
-    // const recordingLink = 'invalid-link';
 
     // Call the transcription API
-    /* if (recordingLink === 'invalid-link') {
-      throw new Error('Invalid recording link');
-    } */
     const transcriptResponse = await axios.post(`${serverUrl}/api/transcribe`, {
       recordingLink,
     });
