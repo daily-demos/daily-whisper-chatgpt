@@ -4,21 +4,27 @@ This is a demo app that uses OpenAI Whisper and ChatGPT, Daily's video APIs, and
 
 ## **Installation**
 
-To get started, clone this repository and set the following environment variables:
+To get started, clone this repository and set the following environment variables copy **`Sample.env`** and change it to **`.env.local`**:
 
 - **`DAILY_API_KEY`**: Your Daily API key
-- **`EMAIL_SUMMARY`**: The email address where the meeting summary will be sent
 - **`NEXT_PUBLIC_ROOM_URL`**: The URL of the Daily room where the meeting will be held
 - **`OPENAI_API_KEY`**: Your OpenAI API key
 - **`SERVER_URL`**: The URL of your server where the app will be hosted
+- **`SMTP_SERVER`**: The SMTP server from your email service
+- **`SMTP_PORT`** : The SMTP port from your email service
+- **`SMTP_LOGIN`** : The SMTP login from your email service
+- **`SMTP_PASSWORD`** : The SMTP password from your email service
+- **`EMAIL_SUMMARY`**: The email address where the meeting summary will be sent
 
 ## **Usage**
 
 1. Install dependencies with **`yarn`**.
 2. Start the app by running **`yarn dev`**.
-3. Join the Daily room using the **`NEXT_PUBLIC_ROOM_URL`** environment variable.
-4. The app will automatically transcribe the meeting using OpenAI Whisper and ChatGPT.
-5. After the meeting, the app will generate a meeting summary and log the preview email to the console for to the email address specified in the **`EMAIL_SUMMARY`** environment variable.
+3. The app should now be running on **`http://localhost:3000`**.
+4. Join the Daily room using the **`NEXT_PUBLIC_ROOM_URL`** environment variable.
+5. Select the recording button to begin recording. Open AI's whisper model has a 25MB file limit, in this demo recording longer meetings will result in an error.
+6. Once the recording is stopped the app will automatically transcribe the meeting using OpenAI Whisper and ChatGPT.
+7. After the meeting, the app will generate a meeting summary and send an email to the **`EMAIL_SUMMARY`** environment variable.
 
 ## **Obtaining Daily API Credentials**
 

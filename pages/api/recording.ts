@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -21,6 +21,7 @@ export default async function handler(
     };
     const recordingsResponse = await axios.get(recordingUrl, authConfig);
 
+    // Retrieving recording data and adding some  error handling
     const recordingsData = recordingsResponse?.data;
     const recordings = recordingsData?.data;
     if (!recordings || recordings.length === 0) {
@@ -37,7 +38,6 @@ export default async function handler(
     }
 
     const recordingLink = accessLinkResponse.data.download_link;
-    console.log('Recording link', recordingLink);
 
     // Return the recording data plus the fetched recording access link
     const recordingsDataWithLink = {
@@ -50,15 +50,23 @@ export default async function handler(
       ],
     };
     return res.status(200).json(recordingsDataWithLink);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send('Could not fetch recording');
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response) {
+      const errorResponse = error.response.data;
+      const statusCode = error.response.status || 500;
+      const statusText = error.response.statusText || 'Internal Server Error';
+      const errorMessage =
+        errorResponse?.error.message ||
+        `Error ${statusCode} ${statusText}: An error occurred while transcribing the call`;
+      return res.status(statusCode).json({ errorMessage });
+    }
+    return res.status(500).json({ errorMessage: 'Internal Server Error' });
   }
 }
 
 function getRoomName(roomURL?: string): string {
   if (!roomURL) {
-    throw new Error("roomURL is undefined");
+    throw new Error('roomURL is undefined');
   }
   const parts = roomURL.split('/');
   return parts[parts.length - 1];

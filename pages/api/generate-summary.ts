@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -7,26 +7,26 @@ export default async function handler(
 ) {
   try {
     const serverUrl = process.env.SERVER_URL;
-    console.log('SERVER_URL', serverUrl, process.env.NEXT_PUBLIC_ROOM_URL);
 
     // Call the recording API
     const recordingResponse = await axios.post(`${serverUrl}/api/recording`);
     const recordingLink = recordingResponse.data.data[0].download_link;
-    console.log('the recordingLink', recordingLink);
+    // const recordingLink = 'invalid-link';
 
     // Call the transcription API
+    /* if (recordingLink === 'invalid-link') {
+      throw new Error('Invalid recording link');
+    } */
     const transcriptResponse = await axios.post(`${serverUrl}/api/transcribe`, {
       recordingLink,
     });
     const { transcription } = transcriptResponse.data;
-    console.log('transcription', transcription);
 
     // Call the summarize API endpoint with the transcription
     const summaryResponse = await axios.post(`${serverUrl}/api/summarize`, {
       transcription,
     });
     const { summary } = summaryResponse.data;
-    console.log('summary', summary);
 
     // Call the email API endpoint with the summary
     const emailResponse = await axios.post(`${serverUrl}/api/email`, {
@@ -36,13 +36,16 @@ export default async function handler(
 
     // Return the result to the client
     res.status(200).json(emailResult);
-  } catch (error) {
-    console.error(error);
-
-    const errorResponse = {
-      error: 'An error occurred while generating the summary',
-    };
-
-    res.status(500).json(errorResponse);
+  } catch (error: unknown) {
+    let errorMessage: string;
+    if (error instanceof AxiosError) {
+      errorMessage =
+        error.response?.data?.errorMessage ||
+        error.message ||
+        'An error occurred while generating the summary';
+    } else {
+      errorMessage = (error as Error).message;
+    }
+    res.status(500).json({ errorMessage });
   }
 }

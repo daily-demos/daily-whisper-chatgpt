@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import FormData from 'form-data';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -24,11 +24,17 @@ export default async function handler(
         },
       })
       .then((transcriptionRes) => transcriptionRes.data);
-    res.status(200).json({ transcription: result });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send('An error occurred while processing the transcription.');
+    return res.status(200).json({ transcription: result });
+  } catch (error: unknown) {
+    if (error instanceof AxiosError && error.response) {
+      const errorResponse = error.response.data;
+      const statusCode = error.response.status || 500;
+      const statusText = error.response.statusText || 'Internal Server Error';
+      const errorMessage =
+        errorResponse?.error.message ||
+        `Error ${statusCode} ${statusText}: An error occurred while transcribing the call`;
+      return res.status(statusCode).json({ errorMessage });
+    }
+    return res.status(500).json({ errorMessage: 'Internal Server Error' });
   }
 }
