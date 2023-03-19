@@ -17,8 +17,7 @@ export default function VideoCall() {
       const newCallFrame = DailyIframe.createFrame({
         showLeaveButton: true,
         iframeStyle: {
-          position: 'absolute',
-          top: '50',
+          top: '0',
           left: '0',
           width: '100VW',
           height: '100VH',
