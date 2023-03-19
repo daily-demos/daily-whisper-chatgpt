@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
-import NotificationBar from './NotificationBar';
+import NotificationBar from './notification';
 
 export default function VideoCall() {
   const [notificationMessage, setNotificationMessage] = useState('');

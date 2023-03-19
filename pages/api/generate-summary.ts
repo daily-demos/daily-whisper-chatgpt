@@ -18,13 +18,13 @@ export default async function handler(
     });
     const { transcription } = transcriptResponse.data;
 
-    // Call the summarize API endpoint with the transcription
+    // Call the summarize API
     const summaryResponse = await axios.post(`${serverUrl}/api/summarize`, {
       transcription,
     });
     const { summary } = summaryResponse.data;
 
-    // Call the email API endpoint with the summary
+    // Call the email API
     const emailResponse = await axios.post(`${serverUrl}/api/email`, {
       summary,
     });

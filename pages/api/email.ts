@@ -34,10 +34,10 @@ export default async function handler(
 
     // send mail with defined transport object
     const info = await transporter.sendMail({
-      from: `"Daily Email Summary Bot" <${smtpLogin}>`, // sender address
+      from: `"Daily Meeting Summary" <${smtpLogin}>`, // sender address
       to: email, // list of receivers
-      subject: 'Your email summary', // Subject line
-      text: `Hello this is an automated meeting summary from your video call: ${summary}`, // plain text body
+      subject: 'Meeting Summary from your Daily Video Call', // Subject line
+      text: `This is an automated meeting summary from your Daily video call: ${summary}`, // plain text body
     });
 
     return res.status(200).json({ info });
