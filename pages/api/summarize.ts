@@ -14,7 +14,7 @@ export default async function handler(
         messages: [
           {
             role: 'user',
-            content: `Summarize the following text: ${transcription.text}`,
+            content: `Summarize the following text. Provide a short summary of the meeting and a bulleted list of the main meeting highlights : ${transcription.text}`,
           },
         ],
       },

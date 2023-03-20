@@ -1,6 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import FormData from 'form-data';
+import { Readable } from 'stream';
+import { promises as fs } from 'fs';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import ffmpeg from 'fluent-ffmpeg';
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,10 +14,33 @@ export default async function handler(
     const audioData = await axios
       .get(recordingLink, { responseType: 'arraybuffer' })
       .then((recordingRes) => recordingRes.data);
-    const audioBuffer = Buffer.from(audioData);
+
+    // Compress audio and remove video
+    const outputFilePath = 'audio_compressed.mp3';
+    const audioBitrate = '64k';
+
+    await new Promise<void>((resolve, reject) => {
+      const audioStream = Readable.from(audioData);
+      ffmpeg(audioStream)
+        .noVideo()
+        .audioBitrate(audioBitrate)
+        .audioCodec('libmp3lame')
+        .on('end', () => {
+          resolve();
+        })
+        .on('error', (error) => {
+          console.error('Error extracting and re-encoding audio:', error);
+          reject(error);
+        })
+        .save(outputFilePath);
+    });
+
+    const compressedAudioData = await fs.readFile(outputFilePath);
+
     const formData = new FormData();
-    formData.append('file', audioBuffer, { filename: 'audio.mp4' });
+    formData.append('file', compressedAudioData, { filename: 'audio.mp3' });
     formData.append('model', 'whisper-1');
+
     const result = await axios
       .post('https://api.openai.com/v1/audio/transcriptions', formData, {
         headers: {
@@ -24,6 +50,7 @@ export default async function handler(
         },
       })
       .then((transcriptionRes) => transcriptionRes.data);
+
     return res.status(200).json({ transcription: result });
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response) {
