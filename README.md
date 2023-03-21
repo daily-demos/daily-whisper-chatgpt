@@ -9,7 +9,6 @@ To get started, clone this repository and set the following environment variable
 - **`DAILY_API_KEY`**: Your Daily API key
 - **`NEXT_PUBLIC_ROOM_URL`**: The URL of the Daily room where the meeting will be held
 - **`OPENAI_API_KEY`**: Your OpenAI API key
-- **`SERVER_URL`**: The URL of your server where the app will be hosted
 - **`SMTP_SERVER`**: The SMTP server from your email service
 - **`SMTP_PORT`** : The SMTP port from your email service
 - **`SMTP_LOGIN`** : The SMTP login from your email service

@@ -41,9 +41,19 @@ export default function VideoCall() {
           const generateSummaryResponse = await axios.post(
             `/api/generate-summary`
           );
-          const emailSent = generateSummaryResponse.data.info;
-          if (emailSent) {
+
+          // Destructure the summary and email responses
+          const { summary } = generateSummaryResponse.data;
+          const { emailResponse } = generateSummaryResponse.data;
+
+          // Send appropriate notifications and console the summary.
+          console.log('Call Summary', summary);
+          if (Object.keys(emailResponse).length > 0) {
             setNotificationMessage(`Meeting summary has been emailed`);
+          } else if (summary) {
+            setNotificationMessage(
+              `Meeting summary has been generated check the browser console`
+            );
           }
         } catch (error: unknown) {
           let errorText: string;

@@ -27,7 +27,6 @@
     "ffmpeg": "^0.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
-    "fs": "^0.0.1-security",
     "next": "13.2.4",
     "nodemailer": "^6.9.1",
     "prettier": "^2.8.3",
