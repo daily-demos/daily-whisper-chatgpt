@@ -21,7 +21,7 @@ To get started, clone this repository and set the following environment variable
 2. Start the app by running **`yarn dev`**.
 3. The app should now be running on **`http://localhost:3000`**.
 4. Join the Daily room using the **`NEXT_PUBLIC_ROOM_URL`** environment variable.
-5. Select the recording button to begin recording. Open AI's whisper model has a 25MB file limit, in this demo recording longer meetings will result in an error.
+5. Select the recording button to begin recording. OpenAI's whisper model has a 25MB file limit. In this demo recording longer meetings will result in an error.
 6. Once the recording is stopped the app will automatically transcribe the meeting using OpenAI Whisper and ChatGPT.
 7. After the meeting, the app will generate a meeting summary and send an email to the **`EMAIL_SUMMARY`** environment variable.
 
