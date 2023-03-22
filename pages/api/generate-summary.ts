@@ -105,7 +105,7 @@ async function transcribeAudio(recordingLink: string): Promise<any> {
   }
 }
 
-// Functio to summarize the transcription
+// Function to summarize the transcription
 async function generateSummary(transcription: string): Promise<any> {
   try {
     const summaryResponse = await axios.post(
