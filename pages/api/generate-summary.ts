@@ -6,19 +6,21 @@ import ffmpeg from 'fluent-ffmpeg';
 import nodemailer from 'nodemailer';
 
 // Import environment variables
-const { env } = process;
-const DailyKey = env.DAILY_API_KEY;
-const OpenAiKey = env.OPENAI_API_KEY;
-const email = env.EMAIL_SUMMARY;
-const smtpLogin = env.SMTP_LOGIN;
-const smtpPassword = env.SMTP_PASSWORD;
-const smtpPort = env.SMTP_PORT;
-const smtpServer = env.SMTP_SERVER;
+const {
+  DAILY_API_KEY,
+  NEXT_PUBLIC_ROOM_URL,
+  OPENAI_API_KEY,
+  EMAIL_SUMMARY,
+  SMTP_LOGIN,
+  SMTP_PASSWORD,
+  SMTP_PORT,
+  SMTP_SERVER,
+} = process.env;
 
 // Function to retrieve the recording Link
 async function getRecordingLink(): Promise<string> {
   try {
-    const roomName = getRoomName(env.NEXT_PUBLIC_ROOM_URL);
+    const roomName = getRoomName(NEXT_PUBLIC_ROOM_URL);
 
     const dailyRecordingsURL = `https://api.daily.co/v1/recordings`;
 
@@ -26,14 +28,16 @@ async function getRecordingLink(): Promise<string> {
     const recordingUrl = `${dailyRecordingsURL}?room_name=${roomName}&limit=1`;
     const authConfig = {
       headers: {
-        Authorization: `Bearer ${DailyKey}`,
+        Authorization: `Bearer ${DAILY_API_KEY}`,
       },
     };
     const recordingsResponse = await axios.get(recordingUrl, authConfig);
 
-    // Retrieving recording data and adding some  error handling
+    // Retrieving recording data
     const recordingsData = recordingsResponse?.data;
     const recordings = recordingsData?.data;
+
+    // Check if recordings was retrieved successfully
     if (!recordings || recordings.length === 0) {
       throw new Error('Could not fetch access link');
     }
@@ -43,12 +47,14 @@ async function getRecordingLink(): Promise<string> {
     // Get the Daily recording access link
     const accessLinkURL = `${dailyRecordingsURL}/${recordingId}/access-link`;
     const accessLinkResponse = await axios.get(accessLinkURL, authConfig);
+    // Check if access link was retrieved successfully
     if (!accessLinkResponse.data || !accessLinkResponse.data.download_link) {
       throw new Error('Could not fetch access link');
     }
-
+    // Extract the download link from the response data
     const recordingLink = accessLinkResponse.data.download_link;
     return recordingLink;
+    // Handle any errors that occur during the process
   } catch (error: unknown) {
     if (error instanceof Error) {
       throw new Error(`Error while getting recording link: ${error.message}`);
@@ -75,6 +81,7 @@ async function transcribeAudio(recordingLink: string): Promise<any> {
       .format('mp3')
       .pipe();
 
+    // Create the form data and send to Open AI
     const formData = new FormData();
     formData.append('file', ffmpegStream, { filename: 'audio.mp3' });
     formData.append('model', 'whisper-1');
@@ -82,7 +89,7 @@ async function transcribeAudio(recordingLink: string): Promise<any> {
     const result = await axios
       .post('https://api.openai.com/v1/audio/transcriptions', formData, {
         headers: {
-          Authorization: `Bearer ${OpenAiKey}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           'Content-Type': 'multipart/form-data',
           ...formData.getHeaders(),
         },
@@ -90,6 +97,7 @@ async function transcribeAudio(recordingLink: string): Promise<any> {
       .then((transcriptionRes) => transcriptionRes.data);
 
     return { transcription: result };
+    // Handle any errors that occur during the process
   } catch (error: unknown) {
     console.error(error);
     if (error instanceof AxiosError && error.response) {
@@ -106,7 +114,7 @@ async function transcribeAudio(recordingLink: string): Promise<any> {
 }
 
 // Function to summarize the transcription
-async function generateSummary(transcription: string): Promise<any> {
+async function summarizeTranscript(transcription: string): Promise<any> {
   try {
     const summaryResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -121,7 +129,7 @@ async function generateSummary(transcription: string): Promise<any> {
       },
       {
         headers: {
-          Authorization: `Bearer ${OpenAiKey}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }
@@ -132,6 +140,8 @@ async function generateSummary(transcription: string): Promise<any> {
       message: { content: summary },
     } = summaryResponse.data.choices[0];
     return { summary };
+
+    // Handle errors in the process
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response) {
       const errorResponse = error.response.data;
@@ -151,19 +161,19 @@ async function emailSummary(summary: string): Promise<any> {
   try {
     // create reusable transporter object using the default SMTP transport
     const transporter = nodemailer.createTransport({
-      host: smtpServer,
-      port: smtpPort,
+      host: SMTP_SERVER,
+      port: SMTP_PORT,
       secure: false,
       auth: {
-        user: smtpLogin,
-        pass: smtpPassword,
+        user: SMTP_LOGIN,
+        pass: SMTP_PASSWORD,
       },
     } as nodemailer.TransportOptions);
 
     // send mail with defined transport object
     const info = await transporter.sendMail({
-      from: `"Daily Meeting Summary" <${smtpLogin}>`,
-      to: email,
+      from: `"Daily Meeting Summary" <${SMTP_LOGIN}>`,
+      to: EMAIL_SUMMARY,
       subject: 'Meeting Summary from your Daily Video Call',
       text: `This is an automated meeting summary from your Daily video call: ${summary}`,
     });
@@ -192,19 +202,26 @@ export default async function handler(
       transcription: { text: transcription },
     } = transcriptResponse;
 
-    // Summarize the recording
-    const summaryResponse = await generateSummary(transcription);
+    // Summarize the transcript
+    const summaryResponse = await summarizeTranscript(transcription);
     const { summary } = summaryResponse;
 
     // Send the email
     let emailResponse = {};
-    if (email && smtpLogin && smtpPassword && smtpPort && smtpServer) {
+    if (
+      EMAIL_SUMMARY &&
+      SMTP_LOGIN &&
+      SMTP_PASSWORD &&
+      SMTP_PORT &&
+      SMTP_SERVER
+    ) {
       emailResponse = await emailSummary(summary);
     }
 
     // Return the result to the client
     res.status(200).json({ summary, emailResponse });
   } catch (error: unknown) {
+    console.error(error);
     let errorMessage: string;
     if (error instanceof AxiosError) {
       errorMessage =
