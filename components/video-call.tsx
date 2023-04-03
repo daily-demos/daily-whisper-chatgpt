@@ -1,9 +1,14 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
+import NotificationBar from './notification';
 
 export default function VideoCall() {
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState<'success' | 'error'>(
+    'success'
+  );
   const [callFrame, setCallFrame] = useState<DailyCall | null>(null);
   const callFrameRef = useRef<DailyCall | null>(null);
   const roomUrl = process.env.NEXT_PUBLIC_ROOM_URL;
@@ -12,11 +17,11 @@ export default function VideoCall() {
       const newCallFrame = DailyIframe.createFrame({
         showLeaveButton: true,
         iframeStyle: {
-          position: 'fixed',
           top: '0',
           left: '0',
-          width: '100%',
-          height: '100%',
+          width: '100VW',
+          height: '100VH',
+          border: 'none',
         },
       });
       setCallFrame(newCallFrame);
@@ -27,23 +32,47 @@ export default function VideoCall() {
   useEffect(() => {
     if (callFrame) {
       callFrame.join({ url: roomUrl });
-      // Recording events logging recording-started and recording stopped
-      callFrame
-        .on('recording-started', (event) => {
-          console.log('started recording', event);
-        })
-        .on('recording-stopped', async (event) => {
-          console.log('stopped recording', event);
+      // Begin transcribing and generating a summary when recording is stopped
+      callFrame.on('recording-stopped', async () => {
+        try {
+          setNotificationMessage(
+            'Transcribing and generating meeting summary. Please leave app running.'
+          );
           const generateSummaryResponse = await axios.post(
             `/api/generate-summary`
           );
-          const email = generateSummaryResponse.data;
-          console.log('email', email);
-        });
+
+          // Destructure the summary and email responses
+          const { summary } = generateSummaryResponse.data;
+          const { emailResponse } = generateSummaryResponse.data;
+
+          // Send appropriate notifications and console the summary.
+          console.log('Call Summary', summary);
+          if (Object.keys(emailResponse).length > 0) {
+            setNotificationMessage(`Meeting summary has been emailed`);
+          } else if (summary) {
+            setNotificationMessage(
+              `Meeting summary has been generated check the browser console`
+            );
+          }
+        } catch (error: unknown) {
+          let errorText: string;
+          if (error instanceof AxiosError) {
+            errorText =
+              error.response?.data?.errorMessage ||
+              'An error occurred while generating the summary';
+            setNotificationMessage(errorText);
+            setNotificationType('error');
+          } else {
+            errorText = (error as Error).message;
+            setNotificationMessage(errorText);
+            setNotificationType('error');
+          }
+        }
+      });
     }
     return () => {
       callFrame?.destroy();
-      console.log('callFrame destroyed');
     };
   }, [callFrame, roomUrl]);
 
@@ -52,6 +81,7 @@ export default function VideoCall() {
       <Head>
         <title>Video Call</title>
       </Head>
+      <NotificationBar message={notificationMessage} type={notificationType} />
     </>
   );
 }
